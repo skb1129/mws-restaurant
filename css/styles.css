@@ -127,7 +127,6 @@ nav h1 a {
   letter-spacing: 0;
   margin: 10px;
   padding: 0 10px;
-  width: 200px;
 }
 
 /* ====================== Restaurant Listing ====================== */
@@ -296,4 +295,8 @@ nav h1 a {
   #breadcrumb {
     width: calc(100% - 80px);
   }
+}
+
+#neighborhoods-select, #cuisines-select {
+  min-width: 30%;
 }
