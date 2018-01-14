@@ -15,7 +15,9 @@ body {
 ul, li {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
-	color: #333;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 a {
 	color: orange;
@@ -67,6 +69,8 @@ nav h1 a {
   text-transform: uppercase;
 }
 #breadcrumb {
+    height: 15px;
+    text-align: left;
     padding: 10px 40px 16px;
     list-style: none;
     background-color: #eee;
@@ -243,7 +247,7 @@ nav h1 a {
   border-top: 1px solid #fff;
   padding: 2.5%;
   width: 45%;
-  margin-top: 125px;
+  margin-top: 120px;
 }
 #reviews-container {
   padding: 2.5%;
@@ -285,7 +289,7 @@ nav h1 a {
     position: relative;
     width: 100%;
     top: 0;
-    padding-top: 131px;
+    padding-top: 120px;
   }
   #restaurant-container, #reviews-container {
     width: 95%;
