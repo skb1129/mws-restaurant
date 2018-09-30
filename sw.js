@@ -36,9 +36,11 @@ self.addEventListener('fetch', function (event) {
 		} else {
 			return fetch(event.request).then(function (response) {
 				var responseClone = response.clone();
-				caches.open(CACHE_VERSION).then(function (cache) {
-					cache.put(event.request, responseClone);
-				});
+				if (event.request.method == 'GET') {
+					caches.open(CACHE_VERSION).then(function (cache) {
+						cache.put(event.request, responseClone);
+					});
+				}
 				return response;
 			});
 		}

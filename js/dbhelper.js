@@ -8,8 +8,8 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    const port = 1337; // Change this to your server port
+    return `http://localhost:${port}`;
   }
 
   /**
@@ -17,10 +17,11 @@ class DBHelper {
    */
   static fetchRestaurants(callback) {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
+    xhr.open('GET', DBHelper.DATABASE_URL + '/restaurants');
     xhr.onload = () => {
       if (xhr.status === 200) { // Got a success response from server!
         const restaurants = JSON.parse(xhr.responseText);
+        createAndUpdateDB(restaurants, null);
         callback(null, restaurants);
       } else { // Oops!. Got an error from server.
         const error = (`Request failed. Returned status of ${xhr.status}`);
@@ -28,6 +29,37 @@ class DBHelper {
       }
     };
     xhr.send();
+  }
+
+  /**
+   * Fetch reviews of a restaurant.
+   */
+  static fetchReviews(callback) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', DBHelper.DATABASE_URL + '/reviews');
+    xhr.onload = () => {
+      if (xhr.status === 200) { // Got a success response from server!
+        const reviews = JSON.parse(xhr.responseText);
+        createAndUpdateDB(null, reviews);
+        callback(null, reviews);
+      } else { // Oops!. Got an error from server.
+        const error = (`Request failed. Returned status of ${xhr.status}`);
+        callback(error, null);
+      }
+    };
+    xhr.send();
+  }
+
+  /**
+   * Post a review.
+   */
+  static postReview(review) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', DBHelper.DATABASE_URL + '/reviews');
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(review));
+    addReviewDB(review);
+    console.log("done");
   }
 
   /**
@@ -90,7 +122,7 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants
+        let results = restaurants;
         if (cuisine != 'all') { // filter by cuisine
           results = results.filter(r => r.cuisine_type == cuisine);
         }
@@ -112,9 +144,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -130,9 +162,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
+        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i);
         callback(null, uniqueCuisines);
       }
     });
@@ -175,7 +207,6 @@ if (navigator.serviceWorker) {
   navigator.serviceWorker.register('./sw.js')
     .then(function (registration) {
       console.log(registration);
-      createAndUpdateDB();
     })
     .catch(function (e) {
       console.error(e);
@@ -184,7 +215,7 @@ if (navigator.serviceWorker) {
   console.log('Service Worker is not supported in this browser.');
 }
 
-function createAndUpdateDB() {
+function createAndUpdateDB(restaurants, reviews) {
   'use strict';
 
   //check for support
@@ -199,25 +230,65 @@ function createAndUpdateDB() {
         keyPath: 'id'
       });
     }
+    if (!upgradeDb.objectStoreNames.contains('reviews')) {
+      upgradeDb.createObjectStore('reviews', {
+        keyPath: 'id'
+      });
+    }
   });
 
-  var items;
-  DBHelper.fetchRestaurants((error, restaurants) => {
-    if (error) {
-      console.log(error);
-    } else {
-      items = restaurants;
+  if(restaurants) {
+    dbPromise.then(function (db) {
+      var tx = db.transaction('restaurants', 'readwrite');
+      var store = tx.objectStore('restaurants');
+      restaurants.forEach(restaurant => {
+        store.put(restaurant);
+      });
+      return tx.complete;
+    }).then(function () {
+      console.log('Restaurants Updated');
+    });
+  }
+
+  if(reviews) {
+    dbPromise.then(function (db) {
+      var tx = db.transaction('reviews', 'readwrite');
+      var store = tx.objectStore('reviews');
+      reviews.forEach(review => {
+        store.put(review);
+      });
+      return tx.complete;
+    }).then(function () {
+      console.log('Reviews Updated');
+    });
+  }
+}
+
+function addReviewDB(review) {
+  'use strict';
+
+  //check for support
+  if (!('indexedDB' in window)) {
+    console.log('This browser doesn\'t support IndexedDB');
+    return;
+  }
+
+  var dbPromise = idb.open('restaurant-reviews', 1, function (upgradeDb) {
+    if (!upgradeDb.objectStoreNames.contains('reviews')) {
+      upgradeDb.createObjectStore('reviews', {
+        keyPath: 'id'
+      });
     }
   });
 
   dbPromise.then(function (db) {
-    var tx = db.transaction('restaurants', 'readwrite');
-    var store = tx.objectStore('restaurants');
-    items.forEach(item => {
-      store.put(item);
-    });
+    var tx = db.transaction('reviews', 'readwrite');
+    var store = tx.objectStore('reviews');
+    var length = store.getAll().length;
+    review.id = length + 1;
+    store.put(review);
     return tx.complete;
   }).then(function () {
-    console.log('Store Updated');
+    console.log('Review Added');
   });
 }

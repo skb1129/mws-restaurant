@@ -51,6 +51,13 @@
     <!-- Beginning reviews -->
     <section id="reviews-container">
       <ul id="reviews-list"></ul>
+      <h4>Add a Review :</h4>
+      <form action="" id="review-form">
+        <input type="text" name="name" placeholder="Name">
+        <input type="number" name="rating" max="5" min="0" placeholder="Rating">
+        <textarea name="comment" cols="30" rows="10">Comments</textarea>
+        <input type="button" value="Submit" onclick="postReview()">
+      </form>
     </section>
     <!-- End reviews -->
   </main>

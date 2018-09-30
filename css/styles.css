@@ -306,3 +306,10 @@ nav h1 a {
 #neighborhoods-select, #cuisines-select {
   min-width: 30%;
 }
+
+input,
+textarea {
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
