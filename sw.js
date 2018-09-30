@@ -1,4 +1,4 @@
-var CACHE_VERSION = 'restaurant-reviews';
+var CACHE_VERSION = 'restaurant-reviews-v1';
 var CACHE_FILES = [
 	'/',
 	'/index.html',
@@ -6,8 +6,9 @@ var CACHE_FILES = [
     '/css/styles.css',
     '/js/dbhelper.js',
 	'/js/main.js',
-	'/data/restaurants.json',
 	'/js/restaurant_info.js',
+	'/js/idb.js',
+	'/manifest.json',
 	'/img/1.jpg',
 	'/img/2.jpg',
 	'/img/3.jpg',
